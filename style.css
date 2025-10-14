@@ -82,3 +82,8 @@ footer a {
   display: block !important;
 }
 
+/* JSON panel readability */
+.json-card {
+  border: 1px solid #e2e3e5;
+  box-shadow: 0 2px 6px rgba(0,0,0,.05);
+}

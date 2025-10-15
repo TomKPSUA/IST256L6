@@ -1,145 +1,103 @@
-/*
-  IST 256 – Shopper Management JavaScript
-  Team Members:
-  - Jaden Reyes: main JavaScript logic (form, JSON, events)
-  - Thomas Koltes: Bootstrap and HTML integration
-  - David Choe: style tweaks and visual validation feedback
+/* 
+  Authors:
+  - Jaden Reyes — JavaScript (behaviors & field integrity checks), JSON Shopper Document
+  - Thomas Koltes and David Choe — Bootstrap integration and styling
 */
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("shopperForm");
+  const success = document.getElementById("shopperSuccess");
+  const jsonCard = document.getElementById("jsonCard");
+  const jsonOutput = document.getElementById("jsonOutput");
 
-// [Jaden] we made a list to store all the shopper objects
-const shoppers = [];
-
-// [Jaden] grabbing all the HTML elements we need so we can use them in JS
-const form = document.getElementById('shopperForm');
-const showJsonBtn = document.getElementById('showJsonBtn');
-const clearAllBtn = document.getElementById('clearAllBtn');
-const tableBody = document.getElementById('shopperTableBody');
-const jsonOutput = document.getElementById('jsonOutput');
-
-// [David] simple patterns we found online to check email and phone formats
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_RE = /^\d{3}-\d{3}-\d{4}$/;
-
-// [Jaden] this takes the data from the form and builds a JS object for the shopper
-function buildShopperFromForm() {
-  return {
-    firstName: document.getElementById('firstName').value.trim(),
-    lastName: document.getElementById('lastName').value.trim(),
-    email: document.getElementById('email').value.trim(),
-    phone: document.getElementById('phone').value.trim(),
-    loyaltyId: document.getElementById('loyaltyId').value.trim(),
+  const fields = {
+    email: document.getElementById("shopperEmail"),
+    name: document.getElementById("shopperName"),
+    phone: document.getElementById("shopperPhone"),
+    age: document.getElementById("shopperAge"),
+    address: document.getElementById("shopperAddress"),
   };
-}
 
-// [Jaden] checks that everything typed in the form looks okay
-function validateShopper(s) {
-  const errors = [];
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^\+?[\d\s().-]{7,}$/;
+  const nonEmpty = (v) => String(v || "").trim().length > 0;
 
-  // [David] checking that required fields aren’t blank
-  if (!s.firstName) errors.push('First name missing');
-  if (!s.lastName) errors.push('Last name missing');
-  if (!s.email) errors.push('Email missing');
-
-  // [Thomas] testing email pattern
-  if (s.email && !EMAIL_RE.test(s.email)) errors.push('Email format wrong');
-
-  // [Thomas] optional phone but must be the right pattern if filled in
-  if (s.phone && !PHONE_RE.test(s.phone)) errors.push('Phone format should be 555-123-4567');
-
-  // [David] show red border if input is bad or green if good
-  markFieldValidity('firstName', !!s.firstName);
-  markFieldValidity('lastName', !!s.lastName);
-  markFieldValidity('email', !!s.email && EMAIL_RE.test(s.email));
-  markFieldValidity('phone', !s.phone || PHONE_RE.test(s.phone));
-
-  return { valid: errors.length === 0, errors };
-}
-
-// [David] this adds or removes the red/green bootstrap outlines
-function markFieldValidity(inputId, isValid) {
-  const el = document.getElementById(inputId);
-  if (!el) return;
-  el.classList.toggle('is-invalid', !isValid);
-  el.classList.toggle('is-valid', isValid);
-}
-
-// [Jaden] this function updates the shopper table whenever we add or clear people
-function renderTable() {
-  tableBody.innerHTML = '';
-
-  // [Thomas] message if there’s nothing in the table yet
-  if (shoppers.length === 0) {
-    const tr = document.createElement('tr');
-    const td = document.createElement('td');
-    td.colSpan = 5;
-    td.className = 'text-muted';
-    td.textContent = 'No shoppers yet';
-    tr.appendChild(td);
-    tableBody.appendChild(tr);
-    return;
+  function setInvalid(input, msg) {
+    input.classList.remove("is-valid");
+    input.classList.add("is-invalid");
+    const fb = input.nextElementSibling;
+    if (fb && fb.classList.contains("invalid-feedback") && msg) fb.textContent = msg;
+  }
+  function setValid(input) {
+    input.classList.remove("is-invalid");
+    input.classList.add("is-valid");
   }
 
-  // [Jaden] loops through the list and makes rows for each shopper
-  shoppers.forEach((s) => {
-    const tr = document.createElement('tr');
-    [s.firstName, s.lastName, s.email, s.phone || '-', s.loyaltyId || '-'].forEach((val) => {
-      const td = document.createElement('td');
-      td.textContent = val;
-      tr.appendChild(td);
-    });
-    tableBody.appendChild(tr);
-  });
-}
-
-// [Jaden] prints the JSON of the newest shopper added to the page
-function showLatestJson() {
-  if (shoppers.length === 0) {
-    jsonOutput.textContent = 'No shopper JSON to show yet.';
-    return;
+  function validateEmail() {
+    const v = fields.email.value.trim();
+    const ok = nonEmpty(v) && emailRegex.test(v);
+    ok ? setValid(fields.email) : setInvalid(fields.email, "Please enter a valid email (e.g., jane@sample.com).");
+    return ok;
   }
-  const latest = shoppers[shoppers.length - 1];
-  jsonOutput.textContent = JSON.stringify(latest, null, 2);
-}
+  function validateName() {
+    const ok = nonEmpty(fields.name.value);
+    ok ? setValid(fields.name) : setInvalid(fields.name, "Please enter the shopper's name.");
+    return ok;
+  }
+  function validatePhone() {
+    const v = fields.phone.value.trim();
+    const ok = v.length === 0 || phoneRegex.test(v);
+    ok ? setValid(fields.phone) : setInvalid(fields.phone, "Please enter a valid phone (or leave it blank).");
+    return ok;
+  }
+  function validateAge() {
+    const v = Number(fields.age.value);
+    const ok = Number.isFinite(v) && v >= 13 && v <= 120;
+    ok ? setValid(fields.age) : setInvalid(fields.age, "Please enter an age between 13 and 120.");
+    return ok;
+  }
+  function validateAddress() {
+    const ok = nonEmpty(fields.address.value) && fields.address.value.trim().length >= 5;
+    ok ? setValid(fields.address) : setInvalid(fields.address, "Please enter a mailing address.");
+    return ok;
+  }
 
-// [David] clears all the green/red styles after submit so the form looks clean again
-function resetFormVisuals() {
-  ['firstName', 'lastName', 'email', 'phone', 'loyaltyId'].forEach((id) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.classList.remove('is-valid', 'is-invalid');
+  fields.email.addEventListener("input", validateEmail);
+  fields.name.addEventListener("input", validateName);
+  fields.phone.addEventListener("input", validatePhone);
+  fields.age.addEventListener("input", validateAge);
+  fields.address.addEventListener("input", validateAddress);
+
+  form.addEventListener("submit", (e) => {
+    const allValid = [
+      validateEmail(),
+      validateName(),
+      validatePhone(),
+      validateAge(),
+      validateAddress(),
+    ].every(Boolean);
+
+    if (!allValid) {
+      e.preventDefault();
+      e.stopPropagation();
+      success.classList.add("d-none");
+      jsonCard.classList.add("d-none");
+      const firstInvalid = [fields.email, fields.name, fields.phone, fields.age, fields.address]
+        .find((el) => el.classList.contains("is-invalid"));
+      if (firstInvalid) firstInvalid.focus();
+      return;
+    }
+
+    e.preventDefault();
+    const shopper = {
+      email: fields.email.value.trim(),
+      name: fields.name.value.trim(),
+      phone: fields.phone.value.trim() || null,
+      age: Number(fields.age.value),
+      address: fields.address.value.trim(),
+    };
+
+    success.classList.remove("d-none");
+    jsonCard.classList.remove("d-none");
+    jsonOutput.textContent = JSON.stringify(shopper, null, 2);
   });
-}
-
-// [Jaden] runs when the form is submitted
-form.addEventListener('submit', (e) => {
-  e.preventDefault(); // [Thomas] stops the form from reloading the page
-
-  const shopper = buildShopperFromForm();
-  const { valid } = validateShopper(shopper);
-
-  if (!valid) return; // [David] don’t add if there are errors
-
-  // [Jaden] add the new shopper to the list
-  shoppers.push(shopper);
-
-  // [Jaden] show updated table and JSON
-  renderTable();
-  showLatestJson();
-
-  // [Thomas] clear everything for next shopper
-  form.reset();
-  resetFormVisuals();
 });
-
-// [Jaden] button to show JSON again if user clicks it
-showJsonBtn.addEventListener('click', showLatestJson);
-
-// [David] button to clear all shoppers from the list and screen
-clearAllBtn.addEventListener('click', () => {
-  shoppers.splice(0, shoppers.length);
-  renderTable();
-  jsonOutput.textContent = 'All shoppers cleared.';
-});
-
-// [Jaden] this makes sure there’s at least an empty table when page loads
-renderTable();

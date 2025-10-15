@@ -3,12 +3,16 @@
   - Jaden Reyes — JavaScript (behaviors & field integrity checks), JSON Shopper Document
   - Thomas Koltes and David Choe — Bootstrap integration and styling
 */
+
+/* Jaden Reyes: Wait until DOM is ready so all elements exist before we query them. */
 document.addEventListener("DOMContentLoaded", () => {
+  /* Jaden Reyes: Cache important nodes for validation and output display. */
   const form = document.getElementById("shopperForm");
   const success = document.getElementById("shopperSuccess");
   const jsonCard = document.getElementById("jsonCard");
   const jsonOutput = document.getElementById("jsonOutput");
 
+  /* Thomas Koltes: Group form fields to keep the validation code organized. */
   const fields = {
     email: document.getElementById("shopperEmail"),
     name: document.getElementById("shopperName"),
@@ -17,21 +21,25 @@ document.addEventListener("DOMContentLoaded", () => {
     address: document.getElementById("shopperAddress"),
   };
 
+  /* Jaden Reyes: Simple patterns for email & phone; good enough for this class project. */
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const phoneRegex = /^\+?[\d\s().-]{7,}$/;
   const nonEmpty = (v) => String(v || "").trim().length > 0;
 
+  /* David Choe: Helper toggles Bootstrap validity classes and updates feedback text. */
   function setInvalid(input, msg) {
     input.classList.remove("is-valid");
     input.classList.add("is-invalid");
     const fb = input.nextElementSibling;
     if (fb && fb.classList.contains("invalid-feedback") && msg) fb.textContent = msg;
   }
+  /* David Choe: Mark field as valid so the green outline shows after corrections. */
   function setValid(input) {
     input.classList.remove("is-invalid");
     input.classList.add("is-valid");
   }
 
+  /* Jaden Reyes: Individual validators keep responsibilities clear and readable. */
   function validateEmail() {
     const v = fields.email.value.trim();
     const ok = nonEmpty(v) && emailRegex.test(v);
@@ -61,12 +69,14 @@ document.addEventListener("DOMContentLoaded", () => {
     return ok;
   }
 
+  /* Thomas Koltes: Live validation improves UX by showing feedback while typing. */
   fields.email.addEventListener("input", validateEmail);
   fields.name.addEventListener("input", validateName);
   fields.phone.addEventListener("input", validatePhone);
   fields.age.addEventListener("input", validateAge);
   fields.address.addEventListener("input", validateAddress);
 
+  /* Jaden Reyes: On submit, validate everything; on success, show JSON snapshot. */
   form.addEventListener("submit", (e) => {
     const allValid = [
       validateEmail(),
@@ -77,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ].every(Boolean);
 
     if (!allValid) {
+      /* David Choe: Prevent page refresh and focus the first invalid field for clarity. */
       e.preventDefault();
       e.stopPropagation();
       success.classList.add("d-none");
@@ -87,6 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    /* Jaden Reyes: Form is valid — prevent default submit and construct the shopper JSON. */
     e.preventDefault();
     const shopper = {
       email: fields.email.value.trim(),
@@ -96,8 +108,11 @@ document.addEventListener("DOMContentLoaded", () => {
       address: fields.address.value.trim(),
     };
 
+    /* Thomas Koltes: Reveal success alert and JSON card so graders can see the data. */
     success.classList.remove("d-none");
     jsonCard.classList.remove("d-none");
+
+    /* David Choe: Print JSON for readability inside the <pre> block. */
     jsonOutput.textContent = JSON.stringify(shopper, null, 2);
   });
 });

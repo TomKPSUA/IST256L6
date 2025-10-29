@@ -3,31 +3,25 @@ Authorship (comments only, no functional change to your files)
 - Thomas Koltes: Helped wire up Bootstrap UI parts and JSON display section.
 - Jaden Reyes: Wrote the jQuery search, add/remove cart logic, and form->JSON builder.
 - David Choe: Tweaked small CSS helpers and sanity-checked layout.
-
-Note for graders: This script is additive and does not modify existing project code.
 */
 
 (() => {
-  // === Config ===
-  // Toggle this to true when your NodeJS REST service is available.
   const ENABLE_AJAX = false;
-  const AJAX_ENDPOINT = "/api/cart"; // placeholder per assignment note
+  const AJAX_ENDPOINT = "/api/cart";
+  const PAD_IDS_TO = 3;
 
-  // A tiny sample product set for search/add operations.
-  // In a later assignment you can replace this with server data.
   const products = [
     { id: 1, name: "Blouse", category: "Apparel", price: 24.99 },
-    { id: 2, name: "Belt", category: "Accessories", price: 14.50 },
-    { id: 3, name: "Sneakers", category: "Footwear", price: 59.00 },
-    { id: 4, name: "Hat", category: "Accessories", price: 12.00 },
-    { id: 5, name: "Jacket", category: "Apparel", price: 89.00 }
+    { id: 2, name: "Belt", category: "Accessories", price: 14.5 },
+    { id: 3, name: "Sneakers", category: "Footwear", price: 59.0 },
+    { id: 4, name: "Hat", category: "Accessories", price: 12.0 },
+    { id: 5, name: "Jacket", category: "Apparel", price: 89.0 }
   ];
 
-  // In-memory cart: { productId: {id, name, price, qty} }
   const cart = {};
 
-  // === Helpers ===
   function fmt(n) { return `$${Number(n).toFixed(2)}`; }
+  function zfillId(id) { return String(id).padStart(PAD_IDS_TO, "0"); }
 
   function renderSearchRows(list) {
     const $tbody = $("#resultsTable tbody").empty();
@@ -54,18 +48,27 @@ Note for graders: This script is additive and does not modify existing project c
       total += sub;
       const $tr = $("<tr/>");
       $tr.append(`<td>${item.name}</td>`);
-      $tr.append(`<td class="text-center">${item.qty}</td>`);
+      $tr.append(`<td class="text-center"><input type="number" min="1" class="form-control form-control-sm qty-input" data-id="${item.id}" value="${item.qty}"></td>`);
       $tr.append(`<td class="text-end">${fmt(item.price)}</td>`);
       $tr.append(`<td class="text-end">${fmt(sub)}</td>`);
       const $btn = $("<button/>", {
         class: "btn btn-sm btn-outline-danger",
-        text: "X",
+        text: "Remove",
         click: () => removeFromCart(item.id)
       });
       $tr.append($("<td class='text-end'/>").append($btn));
       $tbody.append($tr);
     });
     $("#cartTotal").text(fmt(total));
+
+    $(".qty-input").on("input", function () {
+      const id = Number($(this).data("id"));
+      const val = Math.max(1, Number($(this).val()) || 1);
+      if (cart[id]) {
+        cart[id].qty = val;
+        renderCart();
+      }
+    });
   }
 
   function addToCart(id, qty) {
@@ -91,16 +94,24 @@ Note for graders: This script is additive and does not modify existing project c
 
   function formToJSON(formEl) {
     const data = Object.fromEntries(new FormData(formEl).entries());
-    // Convert numeric fields
     if (data.price !== undefined) data.price = Number(data.price);
     if (data.quantity !== undefined) data.quantity = Number(data.quantity);
-    // Example integrity checks (client-only)
-    const missing = Object.entries(data).filter(([k, v]) => v === "" || v === null);
+    const missing = Object.entries(data).filter(([k, v]) => !v);
     return { ok: missing.length === 0, data, missing: missing.map(x => x[0]) };
   }
 
   function showJSON(obj) {
     $("#jsonOut").text(JSON.stringify(obj, null, 2));
+  }
+
+  function cartItemsArray() {
+    return Object.values(cart).map(item => ({
+      productId: zfillId(item.id),
+      productName: item.name,
+      price: Number(item.price),
+      quantity: Number(item.qty),
+      total: Number((item.price * item.qty).toFixed(2))
+    }));
   }
 
   async function sendCart(collection) {
@@ -121,17 +132,13 @@ Note for graders: This script is additive and does not modify existing project c
     }
   }
 
-  // === DOM wiring ===
   $(document).ready(function () {
-    // Initial search table render
     renderSearchRows(products);
 
-    // Live search
     $("#searchBox").on("input", function () {
       renderSearchRows(filterProducts($(this).val()));
     });
 
-    // Cart form submit -> build JSON + show on page + add to cart
     $("#cartForm").on("submit", function (e) {
       e.preventDefault();
       const result = formToJSON(this);
@@ -141,9 +148,7 @@ Note for graders: This script is additive and does not modify existing project c
       }
       $("#cartMsg").text("Looks good. JSON shown below and item added to cart.");
       showJSON(result.data);
-
-      // Add/update cart based on form data
-      const existing = products.find(p => p.name.toLowerCase() === String(result.data.product_name).toLowerCase());
+      const existing = products.find(p => p.name.toLowerCase() === result.data.product_name.toLowerCase());
       const id = existing ? existing.id : Math.floor(Math.random() * 1000000);
       if (!existing) {
         products.push({ id, name: result.data.product_name, category: result.data.category, price: Number(result.data.price) });
@@ -159,9 +164,9 @@ Note for graders: This script is additive and does not modify existing project c
     });
 
     $("#btnSend").on("click", function () {
-      // Transport entire cart as a collection of items
-      const collection = Object.values(cart);
-      sendCart(collection);
+      const items = cartItemsArray();
+      showJSON(items); // Show JSON array like screenshot
+      sendCart(items);
     });
   });
 })();

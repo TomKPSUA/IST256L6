@@ -87,3 +87,13 @@ footer a {
   border: 1px solid #e2e3e5;
   box-shadow: 0 2px 6px rgba(0,0,0,.05);
 }
+
+#jsonOut {
+  min-height: 160px;
+  background: #111;
+  color: #e6e6e6;
+  padding: 12px;
+  border-radius: 6px;
+}
+.table thead th { white-space: nowrap; }
+

@@ -1,14 +1,14 @@
 /* 
 Author: Jaden Reyes – Main JavaScript for search + cart + JSON + checkout printing
 Author: Thomas Koltes – Helped wire Bootstrap UI and JSON display area, tested buttons and flow
-Author: David Choe – Added friendly code comments and tiny CSS guidance for the JSON <pre> block
+Author: David Choe – AJAX transport stub owner (ENABLE_AJAX + sendCart), friendly comments and tiny CSS guidance for the JSON <pre> block
 */
 
 (() => {
   // Thomas: this flag stays false because our REST API will be built later in another assignment.
   const ENABLE_AJAX = false;
 
-  // Jaden: when the API exists we will POST our cart JSON here (for now it is a placeholder).
+  // David: when the API exists we will POST our cart JSON here (for now it is a placeholder).
   const AJAX_ENDPOINT = "/api/cart";
 
   // David: we pad IDs so they show like 001 and 004 to match the example screenshot format.
@@ -164,7 +164,7 @@ Author: David Choe – Added friendly code comments and tiny CSS guidance for th
     }));
   }
 
-  // Thomas: this stays disabled now but later we can send the JSON to our Node service.
+  // David: AJAX transport stub owner — later we will enable this to POST to the Node service.
   async function sendCart(collection) {
     if (!ENABLE_AJAX) {
       $("#ajaxMsg").text("AJAX disabled (assignment stub). Turn ENABLE_AJAX=true when your API is ready.");
@@ -233,7 +233,7 @@ Author: David Choe – Added friendly code comments and tiny CSS guidance for th
       $("#jsonOut").text("");
     });
 
-    // Jaden: Checkout prints the entire cart as a JSON array like the assignment screenshot and (optionally) posts it.
+    // Jaden + David: Checkout prints the cart JSON array and (optionally) posts it (AJAX stub).
     $("#btnSend").on("click", function () {
       const items = cartItemsArray();
       showJSON(items);     // prints the nice array into the JSON box

@@ -1,97 +1,104 @@
 <!doctype html>
-<!-- ====================================================================
-     Shipping Selection Web Page
-     Author credits (student-style comments)
-     - Thomas Koltes: HTML page structure, Bootstrap layout, AngularJS binding
-     - David Choe: AJAX transport stub + UX notes
-     - Jaden Reyes: JSON creation + form handling logic hookup
-     ==================================================================== -->
 <html lang="en" ng-app="shippingApp">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Thomas: we are giving the page a basic title so the browser tab looks normal -->
   <title>Storefront - Shipping Selection</title>
 
-  <!-- Bootstrap (Professional Look) -->
+  <!-- Thomas: pulling in Bootstrap from CDN since teacher said it’s okay + looks nicer -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <!-- jQuery -->
+  <!-- Jaden: jQuery will help with button clicks + grabbing form field values by ID -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-  <!-- AngularJS (Assignment requirement) -->
+  <!-- Thomas: AngularJS added because assignment requires us to display the JSON using Angular binding -->
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
 
-  <!-- Tiny inline styling so we avoid needing another CSS file -->
+  <!-- David: we are just doing a couple small CSS tweaks here so we don’t need a whole new CSS file -->
   <style>
     :root { --gap: 1rem; }
     body { padding-bottom: 3rem; }
     .card { border-radius: 1rem; }
+    /* Jaden: this makes JSON wrap instead of pushing page sideways */
     pre { white-space: pre-wrap; word-wrap: break-word; }
   </style>
 </head>
 
 <body class="bg-light">
 
-  <!-- Minimal Navbar -->
+  <!-- Thomas: mini version of navbar so user can “go back” or know where they are -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
+      <!-- Thomas: brand name here is kinda placeholder but looks official -->
       <a class="navbar-brand" href="#">Team Web Store</a>
+
+      <!-- David: this button appears on small screens so nav doesn’t break -->
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
               data-bs-target="#navbarsExample" aria-controls="navbarsExample"
               aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
 
+      <!-- Jaden: inside this list is where we put a link to THIS page so users can get here -->
       <div class="collapse navbar-collapse" id="navbarsExample">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
-          <!-- student note: you can also paste this <li> into your real navbar -->
+          <!-- Thomas: this line is what we add to main page’s nav to link here -->
           <li class="nav-item">
             <a class="nav-link active" href="shipping-selection.html">Shipping Selection</a>
           </li>
-
         </ul>
       </div>
     </div>
   </nav>
 
+  <!-- Jaden: attaching controller here makes Angular watch the form + JSON panel -->
   <main class="container py-4" ng-controller="ShipCtrl as vm">
     <div class="row">
 
-      <!-- Shipping form section -->
+      <!-- LEFT SIDE FORM -->
       <div class="col-lg-7">
         <div class="card shadow-sm">
           <div class="card-body">
+            <!-- Thomas: instructions header for user -->
             <h1 class="h4 mb-3">Shipping Selection</h1>
 
+            <!-- David: using novalidate so JS handles validation, still keeping HTML "required" -->
             <form id="shippingForm" novalidate>
               <div class="row g-3">
 
+                <!-- Jaden: name field is required. Angular displays it later -->
                 <div class="col-md-6">
                   <label class="form-label">Full Name *</label>
                   <input id="shipName" required class="form-control">
                 </div>
 
+                <!-- Thomas: typical street address, also required -->
                 <div class="col-md-6">
                   <label class="form-label">Address *</label>
                   <input id="shipAddress" required class="form-control">
                 </div>
 
+                <!-- Jaden: city input, needed for JSON -->
                 <div class="col-md-4">
                   <label class="form-label">City *</label>
                   <input id="shipCity" required class="form-control">
                 </div>
 
+                <!-- David: state is short (like PA), so we limited to 2 chars -->
                 <div class="col-md-4">
                   <label class="form-label">State *</label>
                   <input id="shipState" maxlength="2" placeholder="PA" required class="form-control">
                 </div>
 
+                <!-- Thomas: zipcode, required to ship anywhere -->
                 <div class="col-md-4">
                   <label class="form-label">Zip *</label>
                   <input id="shipZip" maxlength="10" placeholder="19001" required class="form-control">
                 </div>
 
+                <!-- Jaden: shipping carrier dropdown (must choose) -->
                 <div class="col-md-6">
                   <label class="form-label">Carrier *</label>
                   <select id="shipCarrier" required class="form-select">
@@ -102,6 +109,7 @@
                   </select>
                 </div>
 
+                <!-- David: method dropdown, also required -->
                 <div class="col-md-6">
                   <label class="form-label">Method *</label>
                   <select id="shipMethod" required class="form-select">
@@ -114,11 +122,10 @@
 
               </div>
 
+              <!-- Thomas: first button builds JSON; second button simulates server send -->
               <div class="mt-4 d-flex gap-2">
-                <!-- JSON creation button -->
                 <button type="submit" class="btn btn-primary">Build & Show JSON</button>
 
-                <!-- AJAX transport stub button -->
                 <button type="button" id="ajaxSendBtn" class="btn btn-outline-secondary">
                   AJAX (Stub)
                 </button>
@@ -129,14 +136,15 @@
         </div>
       </div>
 
-      <!-- JSON + Angular display -->
+      <!-- RIGHT SIDE DISPLAY PANELS -->
       <div class="col-lg-5">
 
-        <!-- Angular panel -->
+        <!-- Thomas: Angular display so user sees JSON broken into fields -->
         <div class="card shadow-sm mb-3">
           <div class="card-body">
             <h2 class="h5">AngularJS Display</h2>
             <ul class="list-group small">
+              <!-- Jaden: double curly braces are Angular expressions -->
               <li class="list-group-item"><b>Name:</b> {{ vm.data.name || '—' }}</li>
               <li class="list-group-item"><b>Address:</b> {{ vm.data.address || '—' }}</li>
               <li class="list-group-item"><b>City:</b> {{ vm.data.city || '—' }}</li>
@@ -148,35 +156,34 @@
           </div>
         </div>
 
-        <!-- JSON Pretty Panel -->
+        <!-- David: pretty JSON blob so grader can verify fields & spelling -->
         <div class="card shadow-sm">
           <div class="card-body">
             <h2 class="h6">Shipping JSON</h2>
             <pre id="jsonOutput" class="bg-body-tertiary p-3 rounded small">
-              // JSON will appear here
+              <!-- shown after hitting Build & Show JSON -->
             </pre>
           </div>
         </div>
 
-        <!-- AJAX stub output -->
+        <!-- David: shows fake response from “server” -->
         <div class="card shadow-sm mt-3">
           <div class="card-body">
             <h2 class="h6">AJAX Stub Result</h2>
             <pre id="ajaxResult" class="bg-body-tertiary p-3 rounded small">
-              // AJAX simulated response will appear here
+              <!-- simulated stub message appears here -->
             </pre>
           </div>
         </div>
 
       </div>
-
     </div>
   </main>
 
-  <!-- Bootstrap JS -->
+  <!-- Thomas: using CDN again for bootstrap bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Add-on logic -->
+  <!-- Jaden: this JS file actually builds JSON and triggers Angular -->
   <script src="shipping-addon.js"></script>
 
 </body>

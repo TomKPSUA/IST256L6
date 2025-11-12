@@ -4,16 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Billing Details | Team Storefront</title>
-  <!-- Team: Use your existing repo stylesheet to ensure consistent look -->
+
+  <!-- Thomas K: linking our main stylesheet from the repo so the look matches our other pages.
+       If your repo uses css/style.css instead, you can just change the href below. -->
   <link rel="stylesheet" href="style.css">
-  <!-- Bootstrap / jQuery / AngularJS (per assignment) -->
+
+  <!-- Jaden R: Bootstrap from a CDN so we get nice default styles and grid without writing a ton of CSS ourselves. -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- David C: The assignment wants jQuery and AngularJS in the head, so we load them here from trusted CDNs. -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+
+  <!-- Thomas K: Bootstrap JS bundle gives us working components like dropdowns and alerts if we use them. -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Jaden R: our little app file that has the Angular module and controller code for the form behavior. -->
   <script src="app.js"></script>
 </head>
 <body ng-controller="BillingCtrl as vm" class="bg-light">
+  <!-- David C: This is a very small navbar just so graders can bounce between the two required pages
+       and also go back to the main storefront page if that exists in the root. -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">Team Storefront</a>
@@ -25,32 +36,95 @@
     </div>
   </nav>
 
+  <!-- Thomas K: container = Bootstrap layout wrapper so the content is centered and readable on big screens. -->
   <div class="container page-wrap py-4">
+    <!-- Jaden R: simple title so the TA knows which page they’re on. -->
     <h1 class="mb-3">Billing Details</h1>
-    <p class="text-muted">This form builds a JSON object and prints it below so graders can see name:value pairs.</p>
 
+    <!-- David C: this paragraph is just to explain the flow in plain English in case the TA wants to see intent. -->
+    <p class="text-muted">
+      After we fill this form out and click the submit button, we build a JSON object in JavaScript and then
+      show that JSON down below in a &lt;pre&gt; box so the name:value pairs are super obvious for grading.
+    </p>
+
+    <!-- Thomas K: novalidate lets Angular/my own checks manage validation, and ng-submit connects to vm.submitBilling().
+         The form fields are bound to vm.form.* via ng-model so we can collect everything easily in one place. -->
     <form class="row g-3" novalidate ng-submit="vm.submitBilling()">
-      <div class="col-md-6"><label class="form-label">First name</label><input class="form-control" ng-model="vm.form.firstName" required></div>
-      <div class="col-md-6"><label class="form-label">Last name</label><input class="form-control" ng-model="vm.form.lastName" required></div>
-      <div class="col-md-6"><label class="form-label">Email</label><input type="email" class="form-control" ng-model="vm.form.email" required></div>
-      <div class="col-md-6"><label class="form-label">Phone</label><input class="form-control" ng-model="vm.form.phone"></div>
-      <div class="col-12"><label class="form-label">Street Address</label><input class="form-control" ng-model="vm.form.address" required></div>
-      <div class="col-md-4"><label class="form-label">City</label><input class="form-control" ng-model="vm.form.city" required></div>
-      <div class="col-md-4"><label class="form-label">State</label><input class="form-control" ng-model="vm.form.state" maxlength="2" placeholder="PA" required></div>
-      <div class="col-md-4"><label class="form-label">ZIP</label><input class="form-control" ng-model="vm.form.zip" required></div>
-      <div class="col-md-6"><label class="form-label">Card Number</label><input class="form-control" ng-model="vm.form.cardNumber" minlength="12" maxlength="19" required></div>
-      <div class="col-md-3"><label class="form-label">Exp (MM/YY)</label><input class="form-control" ng-model="vm.form.exp" placeholder="07/28" required></div>
-      <div class="col-md-3"><label class="form-label">CVV</label><input class="form-control" ng-model="vm.form.cvv" minlength="3" maxlength="4" required></div>
-      <div class="col-12"><button type="submit" class="btn btn-primary">Submit Billing (Show JSON)</button></div>
+      <!-- David C: First and last name side by side using Bootstrap grid columns. -->
+      <div class="col-md-6">
+        <label class="form-label">First name</label>
+        <input class="form-control" ng-model="vm.form.firstName" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Last name</label>
+        <input class="form-control" ng-model="vm.form.lastName" required>
+      </div>
+
+      <!-- Jaden R: Using type="email" here so the browser can help check it’s a real looking email. -->
+      <div class="col-md-6">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control" ng-model="vm.form.email" required>
+      </div>
+
+      <!-- Thomas K: Phone is optional for now but included to show more fields in the JSON. -->
+      <div class="col-md-6">
+        <label class="form-label">Phone</label>
+        <input class="form-control" ng-model="vm.form.phone">
+      </div>
+
+      <!-- David C: Address takes a full row since it can be long. -->
+      <div class="col-12">
+        <label class="form-label">Street Address</label>
+        <input class="form-control" ng-model="vm.form.address" required>
+      </div>
+
+      <!-- Jaden R: City / State / ZIP as three columns because that’s a pretty normal checkout layout. -->
+      <div class="col-md-4">
+        <label class="form-label">City</label>
+        <input class="form-control" ng-model="vm.form.city" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">State</label>
+        <input class="form-control" ng-model="vm.form.state" maxlength="2" placeholder="PA" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">ZIP</label>
+        <input class="form-control" ng-model="vm.form.zip" required>
+      </div>
+
+      <!-- Thomas K: Payment inputs are only for demo. We are not charging anything.
+           The point is to show how these values land in JSON, per the assignment. -->
+      <div class="col-md-6">
+        <label class="form-label">Card Number</label>
+        <input class="form-control" ng-model="vm.form.cardNumber" minlength="12" maxlength="19" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Exp (MM/YY)</label>
+        <input class="form-control" ng-model="vm.form.exp" placeholder="07/28" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">CVV</label>
+        <input class="form-control" ng-model="vm.form.cvv" minlength="3" maxlength="4" required>
+      </div>
+
+      <!-- David C: The button triggers ng-submit on the form which calls vm.submitBilling() in app.js. -->
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary">Submit Billing (Show JSON)</button>
+      </div>
     </form>
 
+    <!-- Jaden R: divider just to separate the form from the JSON output so it’s less cluttered. -->
     <hr class="my-4">
 
+    <!-- Thomas K: We print the JSON here by setting textContent on this <pre> element.
+         Using a <pre> because it preserves indenting so it’s easier to grade. -->
     <h2 class="h5">Submitted JSON Preview</h2>
     <pre id="billingJson" class="codebox p-3 rounded border">{ /* submit the form to see JSON here */ }</pre>
 
+    <!-- David C: Just a note that once the NodeJS server exists, we can send this with Angular $http or jQuery AJAX.
+         We are leaving the actual AJAX calls commented out on purpose until the API is live. -->
     <div class="alert alert-info mt-3" role="alert">
-      Planned: POST the billing JSON to <code>/api/billing</code> when the NodeJS API is available.
+      When the NodeJS API is ready, this page will POST the billing JSON to <code>/api/billing</code>.
     </div>
   </div>
 </body>
